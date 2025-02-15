@@ -338,9 +338,9 @@ function main {
     check_nmap
     check_misconfigurations
     user_info
-    echo -e "${C_GREEN}#########################################${C_RESET}"
-    echo -e "${C_GREEN}########### Goodbye! ####################${C_RESET}"
-    echo -e "${C_GREEN}#########################################${C_RESET}"
+    echo -e "${C_GREEN}##########################################${C_RESET}"
+    echo -e "${C_GREEN}############## Goodbye! ##################${C_RESET}"
+    echo -e "${C_GREEN}##########################################${C_RESET}"
 }
 
 # Parse command line options
