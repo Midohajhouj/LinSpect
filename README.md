@@ -30,10 +30,9 @@ Option	Description
 -u	Perform user and group checks only
 
 Running the script without any options defaults to a full scan.
-Examples:
-bash
-Copy
 
+
+Examples:
 ### Run a full system scan
 ./Linspect.sh -f
 
