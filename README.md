@@ -79,7 +79,7 @@ This script is intended for ethical purposes and educational use only. Always ob
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 
-credit to <a href="https://github.com/The-Z-Labs">The-Z-Labs</a>
+Credit to <a href="https://github.com/The-Z-Labs">The-Z-Labs</a>
 ---
 
 *<p align="center"> Coded by <a href="https://github.com/Midohajhouj">MIDO777</a> </p>*
