@@ -10,7 +10,7 @@ Linspect is a powerful Linux enumeration and privilege escalation script designe
 - **User and Group Enumeration**: Displays user privileges, SUID/SGID files, and sudo rights.
 - **Network Scanning**: Shows IP configuration, open ports, and routing/ARP tables.
 - **Kernel CVE Checks**: Links to CVEs related to the current kernel.
-- **Exploit Suggestions**: Downloads and runs Linux Exploit Suggester tools.
+- **Exploit Suggestions**: Runs Linux Exploit Suggester tools.
 - **Common Misconfigurations**: Identifies insecure `.bash_history`, SSH keys, and cron jobs.
 - **Custom Scan Options**: Perform specific scans like quick system checks, exploit checks, or full system audits.
 
