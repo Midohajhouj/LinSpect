@@ -1,4 +1,4 @@
-# 💥 Linspect (Linux enumeration and privilege escalation)
+# 💥 Linspect ( Linux enumeration and privilege escalation. )
 
 Linspect is a powerful Linux enumeration and privilege escalation script designed to identify vulnerabilities, misconfigurations, and potential security risks. It provides detailed system, user, and network information along with kernel vulnerability checks and exploit suggestions.
 
