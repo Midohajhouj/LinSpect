@@ -52,27 +52,14 @@ Examples:
 
     Built-In Exploit Tools: Automatically fetches and runs popular vulnerability scanners.
 
-## 🛠 Prerequisites
 
-    Bash Shell: Ensure the script is executed in a bash-compatible shell.
-
-    Required Tools: The following tools are optional but recommended for full functionality:
-
-        wget, curl, or python3 for downloading scripts.
-
-        nmap for advanced network scanning.
-
-        perl for executing certain scripts.
-
-Install missing tools via your package manager:
-bash
-Copy
-
-sudo apt-get install nmap perl wget curl -y
+---
 
 🔒 Disclaimer
 
 This script is intended for ethical purposes and educational use only. Always obtain permission before running scans or exploits on systems you do not own.
+
+---
 
 📃 License
 
@@ -80,6 +67,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 
 Credit to <a href="https://github.com/The-Z-Labs">The-Z-Labs</a>
+
 ---
 
 *<p align="center"> Coded by <a href="https://github.com/Midohajhouj">MIDO777</a> </p>*
