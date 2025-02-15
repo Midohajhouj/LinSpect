@@ -270,7 +270,6 @@ done
 main
 
 # linux exploit suggester section
-
 txtred="\e[91;1m"
 txtgrn="\e[1;32m"
 txtgray="\e[0;37m"
