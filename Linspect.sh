@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# LinSpect - Linux Enumeration & Privilege Escalation Tool
+# Linespect - Linux Enumeration & Privilege Escalation Tool
 # Author: MIDO777
-# Version: 2.0
-# Description: A robust tool for Linux system enumeration, privilege escalation, and exploit suggestion.
+# Version: 2
+# Description: A comprehensive tool for Linux system enumeration, privilege escalation, and exploit suggestion.
 
 ###########################################
 #---------------) Colors (----------------#
@@ -31,11 +31,11 @@ C_SAFE='\033[1;32m'      # Green for safe/non-critical
 
 function banner {
     echo -e "${C_CYAN}"
-    echo -e "  ██╗     ██╗███╗   ██╗███████╗███████╗██████╗ ███████╗ ██████╗████████╗"
-    echo -e "  ██║     ██║████╗  ██║██╔════╝██╔════╝██╔══██╗██╔════ ╝██╔════╝╚═██╔══╝"
-    echo -e "  ██║     ██║██╔██╗ ██║█████╗  ███████╗██████╔╝█████╗   ██║       ██║   "
+    echo -e "  ██╗     ██╗███╗   ██╗███████╗███████╗██████╗ ███████╗ ██████ ████████╗  "
+    echo -e "  ██║     ██║████╗  ██║██╔════╝██╔════╝██╔═██╗ ██╔═ ═══╝██╔════╚══██╔══╝"
+    echo -e "  ██║     ██║██╔██╗ ██║█████╗  ███████╗██████╔╝███████╗ ██║       ██║   "
     echo -e "  ██║     ██║██║╚██╗██║██╔══╝  ╚════██║██╔═══╝ ██      ║██║       ██║   "
-    echo -e "  ███████╗██║██║  ████║███████╗███████║██║     ███████║╚██████╗   ██║   "
+    echo -e "  ███████╗██║██║  ████║███████╗███████║██║     ███████║╚██████    ██║   "
     echo -e "  ╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝╚═╝     ╚══════╝ ╚═════╝   ╚═╝   "
     echo -e "${C_RESET}"
     echo -e "${C_GREEN}########################################################${C_RESET}"
@@ -50,7 +50,7 @@ function banner {
 
 function usage {
     banner
-    echo -e "${C_YELLOW}# Example: ./LinSpect.sh${C_RESET}\n"
+    echo -e "${C_YELLOW}# Example: ./Linespect.sh${C_RESET}\n"
     echo "OPTIONS:"
     echo "-h    Displays this help text"
     echo "-s    Perform a quick system scan"
@@ -58,6 +58,10 @@ function usage {
     echo "-e    Perform exploit checks only"
     echo "-n    Perform network checks only"
     echo "-u    Perform user and group checks only"
+    echo "-t    Perform thorough scans (longer runtime)"
+    echo "-k    Search for a specific keyword in config/log files"
+    echo "-r    Save output to a report file"
+    echo "-o    Export findings to a directory"
     echo -e "\n"
     echo "Running with no options = all scans (default behavior)"
     echo -e "${C_GREEN}#########################################${C_RESET}"
@@ -87,154 +91,236 @@ function print_info {
     echo -e "${C_CYAN}[*] $1${C_RESET}"
 }
 
+function print_good {
+    echo -e "${C_GREEN}[+] $1${C_RESET}"
+}
+
+function print_error {
+    echo -e "${C_RED}[!] $1${C_RESET}"
+}
+
+function print_waiting {
+    echo -e "${C_BLUE}[~] $1${C_RESET}"
+}
+
+###########################################
+#---------------) System Info (-----------#
+###########################################
+
 function system_info {
     print_2title "SYSTEM INFORMATION"
+    
+    # Existing checks
     unameinfo=$(uname -a 2>/dev/null)
     if [ $? -eq 0 ]; then
         echo -e "$(get_color critical)[-] Kernel information:${C_RESET}\n$unameinfo"
     else
-        echo -e "${C_RED}[!] Failed to retrieve kernel information.${C_RESET}"
+        print_error "Failed to retrieve kernel information."
     fi
     echo -e "\n"
 
     echo -e "$(get_color info)[-] OS Release:${C_RESET}"
-    cat /etc/os-release 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve OS release information.${C_RESET}"
+    cat /etc/os-release 2>/dev/null | head -n 15 || print_error "Failed to retrieve OS release information."
     echo -e "\n"
 
     echo -e "$(get_color safe)[-] Hostname:${C_RESET}"
-    hostname 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve hostname.${C_RESET}"
+    hostname 2>/dev/null || print_error "Failed to retrieve hostname."
     echo -e "\n"
 
     echo -e "$(get_color safe)[-] Uptime:${C_RESET}"
-    uptime 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve uptime.${C_RESET}"
+    uptime 2>/dev/null || print_error "Failed to retrieve uptime."
     echo -e "\n"
 
     echo -e "$(get_color info)[-] CPU Information:${C_RESET}"
-    lscpu 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve CPU information.${C_RESET}"
+    lscpu 2>/dev/null | head -n 15 || print_error "Failed to retrieve CPU information."
     echo -e "\n"
 
     echo -e "$(get_color info)[-] Memory Information:${C_RESET}"
-    free -h 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve memory information.${C_RESET}"
+    free -h 2>/dev/null || print_error "Failed to retrieve memory information."
     echo -e "\n"
 
     echo -e "$(get_color info)[-] Disk Usage:${C_RESET}"
-    df -h 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve disk usage information.${C_RESET}"
+    df -h 2>/dev/null | head -n 15 || print_error "Failed to retrieve disk usage information."
+    echo -e "\n"
+
+    # New checks
+    echo -e "$(get_color info)[-] Sudo Version:${C_RESET}"
+    sudo -V | head -n 1 2>/dev/null || print_error "Failed to retrieve sudo version."
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] PATH:${C_RESET}"
+    echo $PATH 2>/dev/null || print_error "Failed to retrieve PATH."
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] Date & Uptime:${C_RESET}"
+    date 2>/dev/null || print_error "Failed to retrieve date."
+    uptime 2>/dev/null || print_error "Failed to retrieve uptime."
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] Unmounted File Systems:${C_RESET}"
+    cat /etc/fstab 2>/dev/null | head -n 15 || print_error "Failed to retrieve unmounted file systems."
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] Disk Information:${C_RESET}"
+    print_waiting "Retrieving disk information, this may take a moment..."
+    lsblk 2>/dev/null | head -n 15 || print_error "Failed to retrieve disk information."
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] Environment Variables:${C_RESET}"
+    env 2>/dev/null | head -n 15 || print_error "Failed to retrieve environment variables."
+    echo -e "\n"
+
+    # Unexpected files in /opt
+    echo -e "$(get_color high)[-] Unexpected files in /opt:${C_RESET}"
+    ls -la /opt 2>/dev/null | head -n 15 || print_error "Failed to list /opt directory."
+    echo -e "\n"
+
+    # Unexpected files in root
+    echo -e "$(get_color high)[-] Unexpected files in root:${C_RESET}"
+    ls -la / | grep -E 'swapfile|initrd.img|vmlinuz' 2>/dev/null | head -n 15 || print_error "Failed to list unexpected files in root."
+    echo -e "\n"
+
+    # Modified interesting files in the last 5 minutes
+    echo -e "$(get_color high)[-] Modified interesting files in the last 5 minutes:${C_RESET}"
+    print_waiting "Searching for modified files, this may take a moment..."
+    find / -type f -mmin -5 2>/dev/null | head -n 15 || print_error "Failed to find modified files."
+    echo -e "\n"
+
+    # Searching for passwords in history files
+    echo -e "$(get_color critical)[-] Searching for passwords in history files:${C_RESET}"
+    print_waiting "Searching for passwords in history files, this may take a moment..."
+    history_files=("$HOME/.bash_history" "$HOME/.zsh_history" "/root/.bash_history" "/root/.zsh_history")
+    found_passwords=0
+    for history_file in "${history_files[@]}"; do
+        if [ -f "$history_file" ]; then
+            echo -e "${C_YELLOW}Checking $history_file:${C_RESET}"
+            grep -Ei 'pass|pwd|secret|token|key|credential' "$history_file" 2>/dev/null | while read -r line; do
+                echo -e "${C_RED}[!] Potential password found:${C_RESET} $line"
+                found_passwords=1
+            done
+        else
+            print_error "History file $history_file not found."
+        fi
+    done
+    if [ $found_passwords -eq 0 ]; then
+        print_good "No passwords found in history files."
+    fi
     echo -e "\n"
 }
 
+###########################################
+#---------------) User Info (-------------#
+###########################################
+
 function user_info {
     print_2title "USER/GROUP INFORMATION"
+    
+    # Existing checks
     currusr=$(id 2>/dev/null)
     if [ $? -eq 0 ]; then
         echo -e "$(get_color critical)[-] Current user/group info:${C_RESET}\n$currusr"
     else
-        echo -e "${C_RED}[!] Failed to retrieve current user/group information.${C_RESET}"
+        print_error "Failed to retrieve current user/group information."
     fi
     echo -e "\n"
     
     echo -e "$(get_color high)[-] Sudo privileges:${C_RESET}"
-    sudo -l 2>/dev/null || echo -e "${C_RED}[!] Failed to check sudo privileges.${C_RESET}"
+    sudo -l 2>/dev/null | head -n 15 || print_error "Failed to check sudo privileges."
     echo -e "\n"
 
     echo -e "$(get_color medium)[-] All users:${C_RESET}"
-    cat /etc/passwd 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve user list.${C_RESET}"
+    cat /etc/passwd 2>/dev/null | head -n 15 || print_error "Failed to retrieve user list."
     echo -e "\n"
 
     echo -e "$(get_color medium)[-] All groups:${C_RESET}"
-    cat /etc/group 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve group list.${C_RESET}"
+    cat /etc/group 2>/dev/null | head -n 15 || print_error "Failed to retrieve group list."
     echo -e "\n"
 
     echo -e "$(get_color high)[-] SUID/SGID files:${C_RESET}"
-    find / -perm -4000 -o -perm -2000 2>/dev/null | head -n 20 || echo -e "${C_RED}[!] Failed to find SUID/SGID files.${C_RESET}"
+    print_waiting "Searching for SUID/SGID files, this may take a moment..."
+    find / -perm -4000 -o -perm -2000 2>/dev/null | head -n 15 || print_error "Failed to find SUID/SGID files."
     echo -e "\n"
 
     echo -e "$(get_color high)[-] World-writable files:${C_RESET}"
-    find / -perm -2 -type f 2>/dev/null | head -n 20 || echo -e "${C_RED}[!] Failed to find world-writable files.${C_RESET}"
+    print_waiting "Searching for world-writable files, this may take a moment..."
+    find / -perm -2 -type f 2>/dev/null | head -n 15 || print_error "Failed to find world-writable files."
     echo -e "\n"
 
     echo -e "$(get_color critical)[-] Readable /etc/shadow:${C_RESET}"
     if [ -r /etc/shadow ]; then
-        echo -e "${C_RED}[!] /etc/shadow is readable!${C_RESET}"
+        print_error "/etc/shadow is readable!"
     else
-        echo -e "${C_GREEN}[+] /etc/shadow is not readable.${C_RESET}"
+        print_good "/etc/shadow is not readable."
     fi
+    echo -e "\n"
+
+    # New checks
+    echo -e "$(get_color info)[-] PGP Keys:${C_RESET}"
+    gpg --list-keys 2>/dev/null | head -n 15 || print_error "No PGP keys found."
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] Sudo Tokens:${C_RESET}"
+    ptrace_scope=$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null)
+    if [ "$ptrace_scope" == "0" ]; then
+        print_error "ptrace protection is disabled, sudo tokens could be abused."
+    else
+        print_good "ptrace protection is enabled."
+    fi
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] Pkexec Policy:${C_RESET}"
+    pkexec --version 2>/dev/null || print_error "Pkexec not found."
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] Superusers:${C_RESET}"
+    grep -v -E "^#" /etc/passwd | awk -F: '$3 == 0 {print $1}' 2>/dev/null | head -n 15 || print_error "Failed to retrieve superusers."
+    echo -e "\n"
+
+    echo -e "$(get_color info)[-] Users with Console:${C_RESET}"
+    grep -E "sh$|bash$" /etc/passwd 2>/dev/null | head -n 15 || print_error "Failed to retrieve users with console."
     echo -e "\n"
 }
 
+###########################################
+#---------------) Networking Info (-------#
+###########################################
+
 function networking_info {
     print_2title "NETWORKING INFORMATION"
+    
+    # Existing checks
     nicinfo=$(/sbin/ifconfig -a 2>/dev/null)
     if [ $? -eq 0 ]; then
         echo -e "$(get_color info)[-] Network and IP info:${C_RESET}\n$nicinfo"
     else
-        echo -e "${C_RED}[!] Failed to retrieve network information.${C_RESET}"
+        print_error "Failed to retrieve network information."
     fi
     echo -e "\n"
 
     echo -e "$(get_color high)[-] Open ports:${C_RESET}"
-    netstat -tuln 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve open ports.${C_RESET}"
+    netstat -tuln 2>/dev/null | head -n 15 || print_error "Failed to retrieve open ports."
     echo -e "\n"
 
     echo -e "$(get_color medium)[-] Routing table:${C_RESET}"
-    route -n 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve routing table.${C_RESET}"
+    route -n 2>/dev/null | head -n 15 || print_error "Failed to retrieve routing table."
     echo -e "\n"
 
     echo -e "$(get_color medium)[-] ARP table:${C_RESET}"
-    arp -a 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve ARP table.${C_RESET}"
+    arp -a 2>/dev/null | head -n 15 || print_error "Failed to retrieve ARP table."
     echo -e "\n"
 
     echo -e "$(get_color high)[-] Active connections:${C_RESET}"
-    ss -tuln 2>/dev/null || echo -e "${C_RED}[!] Failed to retrieve active connections.${C_RESET}"
+    ss -tuln 2>/dev/null | head -n 15 || print_error "Failed to retrieve active connections."
     echo -e "\n"
-}
 
-function check_nmap {
-    if command -v nmap &> /dev/null; then
-        print_2title "NMAP SCAN"
-        echo -e "$(get_color critical)[+] Nmap is available. Performing a scan on the machine's IP address...${C_RESET}"
-        
-        ip_address=$(hostname -I | awk '{print $1}')
-        if [ -z "$ip_address" ]; then
-            echo -e "${C_RED}[!] Could not determine the machine's IP address.${C_RESET}"
-            return
-        fi
-
-        echo -e "$(get_color info)[-] Scanning IP address: $ip_address${C_RESET}"
-        nmap -sV $ip_address
+    # New checks
+    echo -e "$(get_color info)[-] Can I sniff with tcpdump?:${C_RESET}"
+    if command -v tcpdump &> /dev/null; then
+        print_good "You can sniff with tcpdump!"
     else
-        print_2title "NMAP SCAN"
-        echo -e "$(get_color info)[-] Nmap is not installed. Skipping Nmap scan.${C_RESET}"
+        print_error "tcpdump not found."
     fi
-}
-
-function check_kernel_cves {
-    print_2title "CHECKING CVES BASED ON KERNEL"
-    echo -e "$(get_color critical)[+] Checking for known CVEs related to the current kernel...${C_RESET}"
-
-    kernel_version=$(uname -r)
-    echo -e "$(get_color info)[-] Current kernel version: $kernel_version${C_RESET}"
-
-    echo -e "$(get_color high)[-] Searching Google and ExploitDB for kernel-related exploits...${C_RESET}"
-    echo -e "${C_BLUE} Google Search: https://www.google.com/search?q=exploit+kernel+$kernel_version${C_RESET}"
-    echo -e "${C_BLUE} ExploitDB Search: https://www.exploit-db.com/search?q=kernel+$kernel_version${C_RESET}"
-
-    if [[ $kernel_version =~ "4.4" || $kernel_version =~ "4.8" || $kernel_version =~ "4.9" ]]; then
-        echo -e "$(get_color critical)[+] Checking CVE-2017-5753 (Spectre) vulnerability...${C_RESET}"
-    fi
-
-    if [[ $kernel_version =~ "3.8" || $kernel_version =~ "3.10" || $kernel_version =~ "4.4" ]]; then
-        echo -e "$(get_color critical)[+] Checking CVE-2017-1000253 (Dirty COW) vulnerability...${C_RESET}"
-    fi
-
-    if [[ $kernel_version =~ "4.19" || $kernel_version =~ "5.4" ]]; then
-        echo -e "$(get_color critical)[+] Checking CVE-2021-3490 (Polkit Privilege Escalation) vulnerability...${C_RESET}"
-    fi
-
-    if [[ $kernel_version =~ "5.10" || $kernel_version =~ "5.11" ]]; then
-        echo -e "$(get_color critical)[+] Checking CVE-2021-4034 (PwnKit) vulnerability...${C_RESET}"
-    fi
-
-    echo ""
+    echo -e "\n"
 }
 
 function linux_exploit_suggester {
@@ -268,21 +354,23 @@ function main {
     banner
     system_info
     networking_info
-    check_nmap
     user_info
-    check_kernel_cves
     linux_exploit_suggester
 }
 
 # Parse command line options
-while getopts "hsfenu" option; do
+while getopts "hsfenutk:r:o:" option; do
     case "${option}" in
         h) usage; exit;;
         s) quick_scan; exit;;
         f) main; exit;;
-        e) linux_exploit_suggester; check_kernel_cves; exit;;
-        n) networking_info; check_nmap; exit;;
+        e) linux_exploit_suggester; exit;;
+        n) networking_info; exit;;
         u) user_info; exit;;
+        t) thorough=1;;
+        k) keyword=${OPTARG};;
+        r) report=${OPTARG};;
+        o) export=${OPTARG};;
         *) usage; exit;;
     esac
 done
