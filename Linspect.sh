@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Linespect - Linux Enumeration & Privilege Escalation Tool
-# Author: LIONBAD
+# Author: LIONMAD
 # Version: 1
 # Description: A comprehensive tool for Linux system enumeration, privilege escalation, and exploit suggestion.
 
@@ -40,7 +40,7 @@ function banner {
     echo -e "${C_RESET}"
     echo -e "${C_GREEN}########################################################${C_RESET}"
     echo -e "${C_BLUE}##      Linux Enumeration & Privilege Escalation       ##${C_RESET}"
-    echo -e "${C_RED}###############     Coded by LIONBAD              ########${C_RESET}"
+    echo -e "${C_RED}###############     Coded by LIONMAD              ########${C_RESET}"
     echo -e "${C_GREEN}########################################################${C_RESET}"
 }
 
