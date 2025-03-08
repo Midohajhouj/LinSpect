@@ -1,4 +1,10 @@
-# 🕵️ Linspect: Linux enumeration and privilege escalation.
+# <p align="center"> **🕵️ Linspect: Linux enumeration**
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/Midohajhouj/Linspect?label=Version&color=a80505">
+  <img src="https://img.shields.io/github/stars/Midohajhouj/Linspect?style=flat&label=Stars&color=a80505">
+  <img src="https://img.shields.io/github/repo-size/Midohajhouj/Linspect?label=Size&color=a80505">
+  <img src="https://img.shields.io/github/languages/top/Midohajhouj/Linspect?color=a80505">
+</p>
 
 Linspect is a powerful Linux enumeration and privilege escalation script designed to identify vulnerabilities, misconfigurations, and potential security risks. It provides detailed system, user, and network information along with kernel vulnerability checks and exploit suggestions.
 
