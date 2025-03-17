@@ -74,8 +74,4 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 
 #### Credit : <a href="https://github.com/The-Z-Labs">The-Z-Labs</a>
-
----
-
-
-### **<p align="center"> Coded by <a href="https://github.com/Midohajhouj">MIDØ</a> </p>**
+**<p align="center"> Coded by <a href="https://github.com/Midohajhouj">MIDØ</a> </p>**
