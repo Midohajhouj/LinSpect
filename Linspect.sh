@@ -62,6 +62,7 @@ function usage {
     echo "-k    Search for a specific keyword in config/log files"
     echo "-r    Save output to a report file"
     echo "-o    Export findings to a directory"
+    echo "-v    Enable verbose mode"
     echo -e "\n"
     echo "Running with no options = all scans (default behavior)"
     echo -e "${C_GREEN}#########################################${C_RESET}"
@@ -134,7 +135,7 @@ function check_path {
 function system_info {
     print_2title "SYSTEM INFORMATION"
     
-    # Existing checks
+    # Kernel information
     unameinfo=$(uname -a 2>/dev/null)
     if [ $? -eq 0 ]; then
         echo -e "$(get_color critical)[-] Kernel information:${C_RESET}\n$unameinfo"
@@ -143,50 +144,62 @@ function system_info {
     fi
     echo -e "\n"
 
+    # OS Release
     echo -e "$(get_color info)[-] OS Release:${C_RESET}"
     cat /etc/os-release 2>/dev/null | head -n 15 || print_error "Failed to retrieve OS release information."
     echo -e "\n"
 
+    # Hostname
     echo -e "$(get_color safe)[-] Hostname:${C_RESET}"
     hostname 2>/dev/null || print_error "Failed to retrieve hostname."
     echo -e "\n"
 
+    # Uptime
     echo -e "$(get_color safe)[-] Uptime:${C_RESET}"
     uptime 2>/dev/null || print_error "Failed to retrieve uptime."
     echo -e "\n"
 
+    # CPU Information
     if check_command "lscpu"; then
         echo -e "$(get_color info)[-] CPU Information:${C_RESET}"
         lscpu 2>/dev/null | head -n 15 || print_error "Failed to retrieve CPU information."
         echo -e "\n"
     fi
 
+    # Memory Information
     echo -e "$(get_color info)[-] Memory Information:${C_RESET}"
     free -h 2>/dev/null || print_error "Failed to retrieve memory information."
     echo -e "\n"
 
+    # Disk Usage
     echo -e "$(get_color info)[-] Disk Usage:${C_RESET}"
     df -h 2>/dev/null | head -n 15 || print_error "Failed to retrieve disk usage information."
     echo -e "\n"
 
-    # New checks
+    # Sudo Version
     check_sudo_version
+
+    # PATH
     check_path
 
+    # Date & Uptime
     echo -e "$(get_color info)[-] Date & Uptime:${C_RESET}"
     date 2>/dev/null || print_error "Failed to retrieve date."
     uptime 2>/dev/null || print_error "Failed to retrieve uptime."
     echo -e "\n"
 
+    # Unmounted File Systems
     echo -e "$(get_color info)[-] Unmounted File Systems:${C_RESET}"
     cat /etc/fstab 2>/dev/null | head -n 15 || print_error "Failed to retrieve unmounted file systems."
     echo -e "\n"
 
+    # Disk Information
     echo -e "$(get_color info)[-] Disk Information:${C_RESET}"
     print_progress "Retrieving disk information, this may take a moment..."
     lsblk 2>/dev/null | head -n 15 || print_error "Failed to retrieve disk information."
     echo -e "\n"
 
+    # Environment Variables
     echo -e "$(get_color info)[-] Environment Variables:${C_RESET}"
     env 2>/dev/null | head -n 15 || print_error "Failed to retrieve environment variables."
     echo -e "\n"
@@ -236,7 +249,7 @@ function system_info {
 function user_info {
     print_2title "USER/GROUP INFORMATION"
     
-    # Existing checks
+    # Current user/group info
     currusr=$(id 2>/dev/null)
     if [ $? -eq 0 ]; then
         echo -e "$(get_color critical)[-] Current user/group info:${C_RESET}\n$currusr"
@@ -245,28 +258,34 @@ function user_info {
     fi
     echo -e "\n"
     
+    # Sudo privileges
     echo -e "$(get_color high)[-] Sudo privileges:${C_RESET}"
     sudo -l 2>/dev/null | head -n 15 || print_error "Failed to check sudo privileges."
     echo -e "\n"
 
+    # All users
     echo -e "$(get_color medium)[-] All users:${C_RESET}"
     cat /etc/passwd 2>/dev/null | head -n 15 || print_error "Failed to retrieve user list."
     echo -e "\n"
 
+    # All groups
     echo -e "$(get_color medium)[-] All groups:${C_RESET}"
     cat /etc/group 2>/dev/null | head -n 15 || print_error "Failed to retrieve group list."
     echo -e "\n"
 
+    # SUID/SGID files
     echo -e "$(get_color high)[-] SUID/SGID files:${C_RESET}"
     print_progress "Searching for SUID/SGID files, this may take a moment..."
     find / -perm -4000 -o -perm -2000 2>/dev/null | head -n 15 || print_error "Failed to find SUID/SGID files."
     echo -e "\n"
 
+    # World-writable files
     echo -e "$(get_color high)[-] World-writable files:${C_RESET}"
     print_progress "Searching for world-writable files, this may take a moment..."
     find / -perm -2 -type f 2>/dev/null | head -n 15 || print_error "Failed to find world-writable files."
     echo -e "\n"
 
+    # Readable /etc/shadow
     echo -e "$(get_color critical)[-] Readable /etc/shadow:${C_RESET}"
     if [ -r /etc/shadow ]; then
         print_error "/etc/shadow is readable!"
@@ -275,11 +294,12 @@ function user_info {
     fi
     echo -e "\n"
 
-    # New checks
+    # PGP Keys
     echo -e "$(get_color info)[-] PGP Keys:${C_RESET}"
     gpg --list-keys 2>/dev/null | head -n 15 || print_error "No PGP keys found."
     echo -e "\n"
 
+    # Sudo Tokens
     echo -e "$(get_color info)[-] Sudo Tokens:${C_RESET}"
     ptrace_scope=$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null)
     if [ "$ptrace_scope" == "0" ]; then
@@ -289,14 +309,17 @@ function user_info {
     fi
     echo -e "\n"
 
+    # Pkexec Policy
     echo -e "$(get_color info)[-] Pkexec Policy:${C_RESET}"
     pkexec --version 2>/dev/null || print_error "Pkexec not found."
     echo -e "\n"
 
+    # Superusers
     echo -e "$(get_color info)[-] Superusers:${C_RESET}"
     grep -v -E "^#" /etc/passwd | awk -F: '$3 == 0 {print $1}' 2>/dev/null | head -n 15 || print_error "Failed to retrieve superusers."
     echo -e "\n"
 
+    # Users with Console
     echo -e "$(get_color info)[-] Users with Console:${C_RESET}"
     grep -E "sh$|bash$" /etc/passwd 2>/dev/null | head -n 15 || print_error "Failed to retrieve users with console."
     echo -e "\n"
@@ -309,7 +332,7 @@ function user_info {
 function networking_info {
     print_2title "NETWORKING INFORMATION"
     
-    # Existing checks
+    # Network and IP info
     nicinfo=$(/sbin/ifconfig -a 2>/dev/null)
     if [ $? -eq 0 ]; then
         echo -e "$(get_color info)[-] Network and IP info:${C_RESET}\n$nicinfo"
@@ -318,23 +341,27 @@ function networking_info {
     fi
     echo -e "\n"
 
+    # Open ports
     echo -e "$(get_color high)[-] Open ports:${C_RESET}"
     netstat -tuln 2>/dev/null | head -n 15 || print_error "Failed to retrieve open ports."
     echo -e "\n"
 
+    # Routing table
     echo -e "$(get_color medium)[-] Routing table:${C_RESET}"
     route -n 2>/dev/null | head -n 15 || print_error "Failed to retrieve routing table."
     echo -e "\n"
 
+    # ARP table
     echo -e "$(get_color medium)[-] ARP table:${C_RESET}"
     arp -a 2>/dev/null | head -n 15 || print_error "Failed to retrieve ARP table."
     echo -e "\n"
 
+    # Active connections
     echo -e "$(get_color high)[-] Active connections:${C_RESET}"
     ss -tuln 2>/dev/null | head -n 15 || print_error "Failed to retrieve active connections."
     echo -e "\n"
 
-    # New checks
+    # Can I sniff with tcpdump?
     echo -e "$(get_color info)[-] Can I sniff with tcpdump?:${C_RESET}"
     if command -v tcpdump &> /dev/null; then
         print_good "You can sniff with tcpdump!"
@@ -395,7 +422,7 @@ function main {
 }
 
 # Parse command line options
-while getopts "hsfenutk:r:o:" option; do
+while getopts "hsfenutk:r:o:v" option; do
     case "${option}" in
         h) usage; exit;;
         s) quick_scan; exit;;
@@ -407,6 +434,7 @@ while getopts "hsfenutk:r:o:" option; do
         k) keyword=${OPTARG};;
         r) report=${OPTARG};;
         o) export=${OPTARG};;
+        v) verbose=1;;
         *) usage; exit;;
     esac
 done
