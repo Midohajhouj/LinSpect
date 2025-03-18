@@ -2,7 +2,7 @@
 
 # Linespect - Linux Enumeration & Privilege Escalation Tool
 # Author: MIDO
-# Version: v1.0
+# Version: v1.1
 # Description: A comprehensive tool for Linux system enumeration, privilege escalation, and exploit suggestion.
 
 ###########################################
@@ -103,9 +103,33 @@ function print_waiting {
     echo -e "${C_BLUE}[~] $1${C_RESET}"
 }
 
+function print_progress {
+    echo -e "${C_BLUE}[~] $1${C_RESET}"
+}
+
 ###########################################
 #---------------) System Info (-----------#
 ###########################################
+
+function check_command {
+    if ! command -v $1 &> /dev/null; then
+        print_error "$1 is not installed."
+        return 1
+    fi
+    return 0
+}
+
+function check_sudo_version {
+    echo -e "$(get_color info)[-] Sudo Version:${C_RESET}"
+    sudo -V | head -n 1 2>/dev/null || print_error "Failed to retrieve sudo version."
+    echo -e "\n"
+}
+
+function check_path {
+    echo -e "$(get_color info)[-] PATH:${C_RESET}"
+    echo $PATH 2>/dev/null || print_error "Failed to retrieve PATH."
+    echo -e "\n"
+}
 
 function system_info {
     print_2title "SYSTEM INFORMATION"
@@ -131,9 +155,11 @@ function system_info {
     uptime 2>/dev/null || print_error "Failed to retrieve uptime."
     echo -e "\n"
 
-    echo -e "$(get_color info)[-] CPU Information:${C_RESET}"
-    lscpu 2>/dev/null | head -n 15 || print_error "Failed to retrieve CPU information."
-    echo -e "\n"
+    if check_command "lscpu"; then
+        echo -e "$(get_color info)[-] CPU Information:${C_RESET}"
+        lscpu 2>/dev/null | head -n 15 || print_error "Failed to retrieve CPU information."
+        echo -e "\n"
+    fi
 
     echo -e "$(get_color info)[-] Memory Information:${C_RESET}"
     free -h 2>/dev/null || print_error "Failed to retrieve memory information."
@@ -144,13 +170,8 @@ function system_info {
     echo -e "\n"
 
     # New checks
-    echo -e "$(get_color info)[-] Sudo Version:${C_RESET}"
-    sudo -V | head -n 1 2>/dev/null || print_error "Failed to retrieve sudo version."
-    echo -e "\n"
-
-    echo -e "$(get_color info)[-] PATH:${C_RESET}"
-    echo $PATH 2>/dev/null || print_error "Failed to retrieve PATH."
-    echo -e "\n"
+    check_sudo_version
+    check_path
 
     echo -e "$(get_color info)[-] Date & Uptime:${C_RESET}"
     date 2>/dev/null || print_error "Failed to retrieve date."
@@ -162,7 +183,7 @@ function system_info {
     echo -e "\n"
 
     echo -e "$(get_color info)[-] Disk Information:${C_RESET}"
-    print_waiting "Retrieving disk information, this may take a moment..."
+    print_progress "Retrieving disk information, this may take a moment..."
     lsblk 2>/dev/null | head -n 15 || print_error "Failed to retrieve disk information."
     echo -e "\n"
 
@@ -182,13 +203,13 @@ function system_info {
 
     # Modified interesting files in the last 5 minutes
     echo -e "$(get_color high)[-] Modified interesting files in the last 5 minutes:${C_RESET}"
-    print_waiting "Searching for modified files, this may take a moment..."
+    print_progress "Searching for modified files, this may take a moment..."
     find / -type f -mmin -5 2>/dev/null | head -n 15 || print_error "Failed to find modified files."
     echo -e "\n"
 
     # Searching for passwords in history files
     echo -e "$(get_color critical)[-] Searching for passwords in history files:${C_RESET}"
-    print_waiting "Searching for passwords in history files, this may take a moment..."
+    print_progress "Searching for passwords in history files, this may take a moment..."
     history_files=("$HOME/.bash_history" "$HOME/.zsh_history" "/root/.bash_history" "/root/.zsh_history")
     found_passwords=0
     for history_file in "${history_files[@]}"; do
@@ -237,12 +258,12 @@ function user_info {
     echo -e "\n"
 
     echo -e "$(get_color high)[-] SUID/SGID files:${C_RESET}"
-    print_waiting "Searching for SUID/SGID files, this may take a moment..."
+    print_progress "Searching for SUID/SGID files, this may take a moment..."
     find / -perm -4000 -o -perm -2000 2>/dev/null | head -n 15 || print_error "Failed to find SUID/SGID files."
     echo -e "\n"
 
     echo -e "$(get_color high)[-] World-writable files:${C_RESET}"
-    print_waiting "Searching for world-writable files, this may take a moment..."
+    print_progress "Searching for world-writable files, this may take a moment..."
     find / -perm -2 -type f 2>/dev/null | head -n 15 || print_error "Failed to find world-writable files."
     echo -e "\n"
 
@@ -323,6 +344,10 @@ function networking_info {
     echo -e "\n"
 }
 
+###########################################
+#---------------) Exploit Suggester (-----#
+###########################################
+
 function linux_exploit_suggester {
     print_2title "LINUX EXPLOIT SUGGESTER"
     
@@ -349,6 +374,17 @@ function linux_exploit_suggester {
 ###########################################
 #---------------) Main (------------------#
 ###########################################
+
+function export_results {
+    local output_file=$1
+    {
+        system_info
+        networking_info
+        user_info
+        linux_exploit_suggester
+    } > "$output_file"
+    print_good "Results exported to $output_file"
+}
 
 function main {
     banner
