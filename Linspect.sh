@@ -6,7 +6,7 @@
 # Description: A comprehensive tool for Linux system enumeration, privilege escalation, and exploit suggestion.
 
 ###########################################
-#---------------) Colors (----------------#
+#---------------) Colors (----------------
 ###########################################
 
 C_RESET='\033[0m'
