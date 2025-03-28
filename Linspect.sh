@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Linespect - Linux Enumeration & Privilege Escalation Tool
-# Author: MIDO
+# Author: LIONMAD
 # Version: v1.0
 # Description: A comprehensive tool for Linux system enumeration, privilege escalation, and exploit suggestion.
 
