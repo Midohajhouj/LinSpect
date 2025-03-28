@@ -1,4 +1,4 @@
-# <p align="center"> **🕵️ Linspect: Linux enumeration**
+# <p align="center"> **🕵️ Linspector: Linux enumeration**
 <p align="center">
   <img src="https://img.shields.io/github/v/release/Midohajhouj/Linspect?label=Version&color=a80505">
   <img src="https://img.shields.io/badge/Open%20Source-Yes-darkviolet?style=flat-square&color=a80505">
@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/github/languages/top/Midohajhouj/Linspect?color=a80505">
 </p>
 
-**Linspect** is a powerful Linux enumeration and privilege escalation script designed to identify vulnerabilities, misconfigurations, and potential security risks. It provides detailed system, user, and network information along with kernel vulnerability checks and exploit suggestions.
+**Linspector** is a powerful Linux enumeration and privilege escalation script designed to identify vulnerabilities, misconfigurations, and potential security risks. It provides detailed system, user, and network information along with kernel vulnerability checks and exploit suggestions.
 
 ---
 
