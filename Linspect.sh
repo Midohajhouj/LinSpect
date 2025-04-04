@@ -3,8 +3,7 @@
 # Linspect - Advanced Linux Enumeration & Privilege Escalation Tool
 # Author: LIONMAD
 # Version: v1.0
-# Description: Comprehensive tool for Linux system enumeration, privilege escalation, 
-#              exploit suggestion, and security auditing with enhanced features.
+# Description: Comprehensive tool for Linux system enumeration, privilege escalation, exploit suggestion, and security auditing with enhanced features.
 
 ###########################################
 #---------------) Colors (----------------
